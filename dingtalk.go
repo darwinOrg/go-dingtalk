@@ -3,6 +3,7 @@ package dgding
 import (
 	dgctx "github.com/darwinOrg/go-common/context"
 	dghttp "github.com/darwinOrg/go-httpclient"
+	dglogger "github.com/darwinOrg/go-logger"
 	"strings"
 )
 
@@ -30,6 +31,19 @@ func (dc *DingtalkClient) SendTextMessage(ctx *dgctx.DgContext, content string) 
 	}
 
 	data, err := dghttp.GlobalHttpClient.DoPostJson(ctx, dc.Webhook, params, map[string]string{})
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func SimpleSendTextMessage(ctx *dgctx.DgContext, webhook, content string) (string, error) {
+	dglogger.Infof(ctx, "simple send text message, content: %s", content)
+	data, err := dghttp.GlobalHttpClient.DoPostJson(ctx, webhook, map[string]any{
+		"msgtype": "text",
+		"text":    map[string]string{"content": content},
+	}, nil)
 	if err != nil {
 		return "", err
 	}
